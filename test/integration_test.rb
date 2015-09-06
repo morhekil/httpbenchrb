@@ -49,7 +49,7 @@ class TestIntegration < Minitest::Test
   end
 
   def test_http_suite
-    res = HTTPBench::Suite.new(
+    res = HTTPBench.new(
       %w(quick slow).map { |p| @httphost.uri(p).to_s }
     ).execute
 
