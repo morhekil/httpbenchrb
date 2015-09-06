@@ -1,11 +1,13 @@
 require 'minitest/autorun'
 
 require 'webrick'
-require 'forwardable'
 require 'uri'
 require 'net/http'
 
 require_relative '../lib/httpbench'
+
+# disabling ABC checks, as test cases are often long, and it is ok
+# rubocop:disable Metrics/AbcSize
 
 class TestIntegration < Minitest::Test
   # HTTPMock configures WEBrick to act as a test http server
@@ -15,11 +17,6 @@ class TestIntegration < Minitest::Test
   #   /quick - replies with OK immediately
   #   /slow  - replies with OK after 1 second delay
   class HTTPMock
-    extend Forwardable
-
-    attr_accessor :srv
-    def_delegators :@srv, :start, :config
-
     ENDPOINTS = {
       '/quick' => ->(_, res) { res.body = 'OK' },
       '/slow' => ->(_, res) { sleep(1) && res.body = 'OK' }
@@ -32,20 +29,27 @@ class TestIntegration < Minitest::Test
     end
 
     def uri(path = nil)
-      URI::HTTP.build(host: config[:ServerName],
-                      port: config[:Port],
+      URI::HTTP.build(host: @srv.config[:ServerName],
+                      port: @srv.config[:Port],
                       path: "/#{path}".gsub(%r{^//}, ''))
+    end
+
+    def start
+      @pid = fork { @srv.start }
+    end
+
+    def shutdown
+      Process.kill 'INT', @pid
+      Process.wait @pid
     end
   end
 
   def setup
-    @httphost = HTTPMock.new
-    fork { @httphost.start }
+    @httphost = HTTPMock.new.tap(&:start)
   end
 
   def teardown
-    Process.kill 'INT', 0
-    Process.waitall
+    @httphost.shutdown
   end
 
   def test_http_suite
