@@ -7,12 +7,16 @@ class TestTarget < Minitest::Test
   MockNetHTTP = Minitest::Mock
   MockHTTPConn = Minitest::Mock
 
+  DEFAULT_HTTP_OPTS = { use_ssl: false,
+                        read_timeout: HTTPBench::Config::TIMEOUT,
+                        open_timeout: HTTPBench::Config::TIMEOUT }
+
   def test_execute_successful_benchmark
     net = MockNetHTTP.new
     http = MockHTTPConn.new
-    t = HTTPBench::Target.new 'http://google.com/search', net
+    t = HTTPBench::Target.new 'http://google.com/search', net: net
 
-    net.expect :start, http, ['google.com', 80, { use_ssl: false }]
+    net.expect :start, http, ['google.com', 80, DEFAULT_HTTP_OPTS]
     http.expect :get, MockResult.new(200), ['/search']
 
     res = t.execute
@@ -26,7 +30,7 @@ class TestTarget < Minitest::Test
       fail Errno::ECONNREFUSED
     end
 
-    t = HTTPBench::Target.new 'http://google.com/search', net
+    t = HTTPBench::Target.new 'http://google.com/search', net: net
     res = t.execute
     assert_kind_of HTTPBench::Error, res
   end
@@ -34,9 +38,9 @@ class TestTarget < Minitest::Test
   def test_with_empty_path
     net = MockNetHTTP.new
     http = MockHTTPConn.new
-    t = HTTPBench::Target.new 'google.com', net
+    t = HTTPBench::Target.new 'google.com', net: net
 
-    net.expect :start, http, ['google.com', 80, { use_ssl: false }]
+    net.expect :start, http, ['google.com', 80, DEFAULT_HTTP_OPTS]
     http.expect :get, MockResult.new(200), ['/']
 
     res = t.execute
@@ -47,9 +51,10 @@ class TestTarget < Minitest::Test
   def test_https_url
     net = MockNetHTTP.new
     http = MockHTTPConn.new
-    t = HTTPBench::Target.new 'https://google.com', net
+    t = HTTPBench::Target.new 'https://google.com', net: net
 
-    net.expect :start, http, ['google.com', 443, { use_ssl: true }]
+    net.expect :start, http, ['google.com', 443,
+                              DEFAULT_HTTP_OPTS.merge(use_ssl: true)]
     http.expect :get, MockResult.new(200), ['/']
 
     res = t.execute

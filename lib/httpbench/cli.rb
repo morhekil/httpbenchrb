@@ -1,21 +1,81 @@
 require 'json'
+require 'optparse'
 
 class HTTPBench
+  # CLI constructs a command line interface to drive HTTPBench. It populates
+  # the config file based on the command line options, and either reads a list
+  # of URLs from a given file, or accepts it from standard input if no file
+  # was specified
   class CLI
+    def initialize
+      @cfg = Config.new STDIN
+    end
+
     def run
-      puts JSON.pretty_generate HTTPBench.new(lines).execute
+      Parser.new(@cfg).populate
+      puts JSON.pretty_generate(benchmark)
     end
 
     private
 
-    def lines
-      lns = source.readlines.map(&:strip)
-      source.close unless source.tty?
-      lns
+    def benchmark
+      HTTPBench.new(@cfg.readlines).execute config: @cfg
     end
 
-    def source
-      @src = ARGV.first ? File.open(File.expand_path(ARGV.first)) : STDIN
+    # Parser deconstructs command line options into the provided config
+    # structure
+    Parser = Struct.new :cfg
+    class Parser
+      extend Forwardable
+      def_delegators :@opts, :on, :on_tail, :separator, :parse!
+
+      OPTS = %i(header file threads timeout help)
+
+      def initialize(*args)
+        super(*args)
+        @opts = OptionParser.new
+      end
+
+      def populate
+        OPTS.each { |m| send m }
+        parse! ARGV
+      end
+
+      def header
+        @opts.banner = 'Usage: httpbench [options]'
+        separator ''
+        separator 'Options:'
+      end
+
+      def file
+        on('-f', '--file [file]', 'file to read URLs from. If not given - '\
+                                  'reads from stdin') do |f|
+          cfg.file = File.open(f)
+        end
+      end
+
+      def threads
+        on('-n', "--threads [N]", Integer,
+           'number of threads to use for http checks',
+           " (defaults to #{cfg.workers})") do |n|
+          cfg.workers = n
+        end
+      end
+
+      def timeout
+        on('-t', "--timeout [N]", Integer,
+           'open and read timeout for http connections',
+           " (in seconds, defaults to #{cfg.timeout})") do |n|
+          cfg.timeout = n
+        end
+      end
+
+      def help
+        on_tail '-h', '--help', 'Show this message' do
+          puts @opts
+          exit
+        end
+      end
     end
   end
 end

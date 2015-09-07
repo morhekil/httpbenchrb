@@ -15,7 +15,8 @@ class TestBenchSuite < Minitest::Test
         urls.delete(url) || fail("Unexpected #{url}")
       end
     end
-    HTTPBench.new(urls).execute target
+
+    HTTPBench.new(urls).execute target: target
     target.verify
   end
 end
