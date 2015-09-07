@@ -1,5 +1,5 @@
 class HTTPBench < Array
-  Config = Struct.new :file, :workers, :timeout
+  Config = Struct.new :infile, :outfile, :workers, :timeout
   # Configuration for HTTPBench instance
   class Config
     FILE = STDIN
@@ -8,7 +8,8 @@ class HTTPBench < Array
 
     def initialize(*args)
       super(*args)
-      self.file ||= STDIN
+      self.infile ||= STDIN
+      self.outfile ||= STDOUT
       self.workers ||= WORKERS
       self.timeout ||= TIMEOUT
     end
@@ -16,8 +17,8 @@ class HTTPBench < Array
     # read all lines from the file, which must be an instance of IO object
     # by the time this method is called
     def readlines
-      lns = file.readlines.map(&:strip)
-      file.close unless file.tty?
+      lns = infile.readlines.map(&:strip)
+      infile.close unless infile.tty?
       lns
     end
 
@@ -26,6 +27,12 @@ class HTTPBench < Array
       (1..workers)
         .map { Thread.new(&block) }
         .each(&:join)
+    end
+
+    # write given data back to the output file
+    def write(data)
+      outfile.write(data)
+      outfile.close unless outfile.tty?
     end
   end
 

@@ -13,7 +13,7 @@ class HTTPBench
 
     def run
       Parser.new(@cfg).populate
-      puts JSON.pretty_generate(benchmark)
+      @cfg.write JSON.pretty_generate(benchmark)
     end
 
     private
@@ -29,7 +29,7 @@ class HTTPBench
       extend Forwardable
       def_delegators :@opts, :on, :on_tail, :separator, :parse!
 
-      OPTS = %i(header file threads timeout help)
+      OPTS = %i(header infile outfile threads timeout help)
 
       def initialize(*args)
         super(*args)
@@ -47,10 +47,17 @@ class HTTPBench
         separator 'Options:'
       end
 
-      def file
-        on('-f', '--file [file]', 'file to read URLs from. If not given - '\
-                                  'reads from stdin') do |f|
-          cfg.file = File.open(f)
+      def infile
+        on('-i', '--infile [file]', 'file to read URLs from. If not given - '\
+                                    'reads from stdin') do |f|
+          cfg.infile = File.open(f)
+        end
+      end
+
+      def outfile
+        on('-o', '--outfile [file]', 'file to write report to. If not given - '\
+                                     'writes to stdout') do |f|
+          cfg.outfile = File.open(f, 'w')
         end
       end
 
