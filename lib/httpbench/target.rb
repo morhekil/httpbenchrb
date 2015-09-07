@@ -9,7 +9,7 @@ class HTTPBench
 
   class Target
     extend Forwardable
-    def_delegators :uri, :host, :port, :path
+    def_delegators :uri, :host, :port, :path, :scheme
 
     def self.benchmark(url)
       new(url).execute
@@ -30,7 +30,7 @@ class HTTPBench
     private
 
     def connect(http = nil)
-      [bm { http = net.start(host, port) },
+      [bm { http = net.start(host, port, use_ssl: scheme == 'https') },
        http]
     end
 
