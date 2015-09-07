@@ -6,4 +6,5 @@ end
 
 require_relative 'httpbench/target'
 require_relative 'httpbench/result'
+require_relative 'httpbench/url'
 require_relative 'httpbench/cli'

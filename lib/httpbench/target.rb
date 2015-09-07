@@ -9,7 +9,7 @@ class HTTPBench
 
   class Target
     extend Forwardable
-    def_delegators :uri, :host
+    def_delegators :uri, :host, :port, :path
 
     def self.benchmark(url)
       new(url).execute
@@ -40,15 +40,7 @@ class HTTPBench
     end
 
     def uri
-      @uri ||= Addressable::URI.heuristic_parse url
-    end
-
-    def port
-      uri.port || (uri.scheme == 'https' ? 443 : 80)
-    end
-
-    def path
-      uri.path.to_s.empty? ? '/' : uri.path
+      @uri ||= URL.parse url
     end
 
     def bm(&blk)
