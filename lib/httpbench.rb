@@ -17,16 +17,18 @@ class HTTPBench < Array
       file.close unless file.tty?
       lns
     end
+
+    def run_pool(&block)
+      (1..workers)
+        .map { Thread.new(&block) }
+        .each(&:join)
+    end
   end
 
   # execute all configured running, running them on a pool of threads
   # capped at config.workers value
   def execute(target: Target, config: Config.new)
-    [].tap do |res|
-      (1..config.workers)
-        .map { Thread.new { process(target, res, config) } }
-        .each(&:join)
-    end
+    [].tap { |res| config.run_pool { process target, res, config } }
   end
 
   private
