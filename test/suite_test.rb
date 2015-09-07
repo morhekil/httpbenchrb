@@ -10,7 +10,11 @@ class TestBenchSuite < Minitest::Test
     urls = ['http://google.com',
             'http://bing.com']
 
-    urls.each { |url| target.expect :benchmark, Res.new(url), [url] }
+    urls.each do |url|
+      target.expect(:benchmark, Res.new(url)) do
+        urls.delete(url) || fail("Unexpected #{url}")
+      end
+    end
     HTTPBench.new(urls).execute target
     target.verify
   end
