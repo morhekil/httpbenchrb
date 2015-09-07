@@ -1,10 +1,11 @@
 class HTTPBench < Array
-  Config = Struct.new :infile, :outfile, :workers, :timeout
+  # default number of thread workers
+  WORKERS = 4
+  # default read/open timeout
+  TIMEOUT = 10
+
   # Configuration for HTTPBench instance
-  class Config
-    FILE = STDIN
-    WORKERS = 4
-    TIMEOUT = 10
+  Config = Struct.new :infile, :outfile, :workers, :timeout do
 
     def initialize(*args)
       super(*args)
@@ -24,9 +25,7 @@ class HTTPBench < Array
 
     # runs a pool of workers, executing given block of code
     def run_pool(&block)
-      (1..workers)
-        .map { Thread.new(&block) }
-        .each(&:join)
+      (1..workers).map { Thread.new(&block) }.each(&:join)
     end
 
     # write given data back to the output file

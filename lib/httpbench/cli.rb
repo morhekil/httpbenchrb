@@ -22,10 +22,9 @@ class HTTPBench
       HTTPBench.new(@cfg.readlines).execute config: @cfg
     end
 
-    Parser = Struct.new :cfg
     # Parser deconstructs command line options into the provided config
     # structure
-    class Parser
+    Parser = Struct.new :cfg do
       extend Forwardable
       def_delegators :@opts, :on, :on_tail, :separator, :parse!
 

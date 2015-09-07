@@ -8,8 +8,8 @@ class TestTarget < Minitest::Test
   MockHTTPConn = Minitest::Mock
 
   DEFAULT_HTTP_OPTS = { use_ssl: false,
-                        read_timeout: HTTPBench::Config::TIMEOUT,
-                        open_timeout: HTTPBench::Config::TIMEOUT }
+                        read_timeout: HTTPBench::TIMEOUT,
+                        open_timeout: HTTPBench::TIMEOUT }
 
   def test_execute_successful_benchmark
     net = MockNetHTTP.new
