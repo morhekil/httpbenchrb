@@ -62,7 +62,7 @@ class HTTPBench
       end
 
       def threads
-        on('-n', "--threads [N]", Integer,
+        on('-n', '--threads [N]', Integer,
            'number of threads to use for http checks',
            " (defaults to #{cfg.workers})") do |n|
           cfg.workers = n
@@ -70,7 +70,7 @@ class HTTPBench
       end
 
       def timeout
-        on('-t', "--timeout [N]", Integer,
+        on('-t', '--timeout [N]', Integer,
            'open and read timeout for http connections',
            " (in seconds, defaults to #{cfg.timeout})") do |n|
           cfg.timeout = n
