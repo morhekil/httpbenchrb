@@ -1,14 +1,15 @@
 require 'benchmark'
 require 'forwardable'
-require 'uri'
+# require 'uri'
+require 'addressable/uri'
+require 'net/http'
 
 class HTTPBench
   Target = Struct.new :url, :net
-  Result = Struct.new :url, :connect_sec, :get_sec, :status
 
   class Target
     extend Forwardable
-    def_delegators :uri, :host, :port
+    def_delegators :uri, :host
 
     def self.benchmark(url)
       new(url).execute
@@ -22,6 +23,8 @@ class HTTPBench
       ctime, http = connect
       gtime, status = get http
       Result.new url, ctime, gtime, status
+    rescue SystemCallError, Timeout::Error => err
+      Error.new url, err
     end
 
     private
@@ -32,12 +35,20 @@ class HTTPBench
     end
 
     def get(http, res = nil)
-      [bm { res = http.get uri.path },
+      [bm { res = http.get(path) },
        res.code]
     end
 
     def uri
-      URI.parse url
+      @uri ||= Addressable::URI.heuristic_parse url
+    end
+
+    def port
+      uri.port || (uri.scheme == 'https' ? 443 : 80)
+    end
+
+    def path
+      uri.path.to_s.empty? ? '/' : uri.path
     end
 
     def bm(&blk)
