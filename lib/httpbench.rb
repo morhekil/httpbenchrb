@@ -6,7 +6,6 @@ class HTTPBench < Array
 
   # Configuration for HTTPBench instance
   Config = Struct.new :infile, :outfile, :workers, :timeout do
-
     def initialize(*args)
       super(*args)
       self.infile ||= STDIN
