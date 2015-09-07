@@ -12,7 +12,7 @@ class HTTPBench
     def_delegators :@uri, :host, :port, :scheme, :path
 
     def self.parse(url)
-      url = "http://#{url}" unless url =~ %r{^\w+://}
+      url = "//#{url}" unless url =~ %r{^\w+://}
       new URI.parse url
     end
 
