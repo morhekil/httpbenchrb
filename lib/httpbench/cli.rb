@@ -9,11 +9,13 @@ class HTTPBench
     private
 
     def lines
-      IO.readlines(path).map(&:strip)
+      lns = source.readlines.map(&:strip)
+      source.close unless source.tty?
+      lns
     end
 
-    def path
-      File.expand_path(ARGV.first)
+    def source
+      @src = ARGV.first ? File.open(File.expand_path(ARGV.first)) : STDIN
     end
   end
 end
