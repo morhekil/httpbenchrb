@@ -1,5 +1,6 @@
 class HTTPBench < Array
   Config = Struct.new :file, :workers, :timeout
+  # Configuration for HTTPBench instance
   class Config
     FILE = STDIN
     WORKERS = 4

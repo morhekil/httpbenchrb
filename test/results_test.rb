@@ -10,7 +10,7 @@ class TestResultFormatting < Minitest::Test
     r = HTTPBench::Result.new URL, 0.120, 1.713, 200
     expected = { url: URL,
                  connect_ms: 120,
-                 get_ms: 1713,
+                 read_ms: 1713,
                  status: 200 }
     assert_equal JSON.pretty_generate(expected),
                  JSON.pretty_generate(r)

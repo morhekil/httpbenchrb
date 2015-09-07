@@ -3,13 +3,21 @@ require 'forwardable'
 require 'net/http'
 
 class HTTPBench
+  # Target is a single benchmarking target (URL), that can be
+  # benchmarked and reported on.
+  #
+  # Normally the benchmark should be executed via Target.benchmark
+  # method call, but for finer control the caller can use a combination
+  # of Target.new and Target#execute
   class Target
     extend Forwardable
     def_delegators :uri, :host, :port, :path, :scheme
+    def_delegators :@cfg, :timeout
 
+    # helper to benchmark real time of a given block
     BM = ->(&blk) { Benchmark.measure { blk.call }.real }
 
-    def self.benchmark(url, cfg)
+    def self.benchmark(url, cfg = Config.new)
       new(url, cfg: cfg).execute
     end
 
@@ -36,8 +44,8 @@ class HTTPBench
 
     def http_opts
       { use_ssl: scheme == 'https',
-        read_timeout: @cfg.timeout,
-        open_timeout: @cfg.timeout }
+        read_timeout: timeout,
+        open_timeout: timeout }
     end
 
     def get(http, res = nil)

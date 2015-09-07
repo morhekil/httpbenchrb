@@ -1,15 +1,19 @@
 class HTTPBench
-  Result = Struct.new :url, :connect_sec, :get_sec, :status
+  Result = Struct.new :url, :connect_sec, :read_sec, :status
+  # Result of a successful measurement - its url, connect/read latency
+  # in ms, and http response status
   class Result
     def to_json(*args)
       { url: url,
         connect_ms: (connect_sec * 1000).to_i,
-        get_ms: (get_sec * 1000).to_i,
+        read_ms: (read_sec * 1000).to_i,
         status: status }.to_json(*args)
     end
   end
 
   Error = Struct.new :url, :exception
+  # Errored measurement attempt - url that triggered the error,
+  # and the raw exception object itself
   class Error
     def to_json(*args)
       { url: url,

@@ -17,10 +17,16 @@ class HTTPBench
     end
 
     def initialize(uri)
-      uri.scheme ||= uri.port == 443 ? 'https' : 'http'
-      uri.port ||= uri.scheme == 'https' ? 443 : 80
-      uri.path = '/' if uri.path.to_s.empty?
-      @uri = uri.freeze
+      @uri = uri
+      guessfill
+    end
+
+    private
+
+    def guessfill
+      @uri.scheme ||= port == 443 ? 'https' : 'http'
+      @uri.port ||= scheme == 'https' ? 443 : 80
+      @uri.path = '/' if path.to_s.empty?
     end
   end
 end

@@ -57,9 +57,9 @@ class TestIntegration < Minitest::Test
       %w(quick slow).map { |p| @httphost.uri(p).to_s }
     ).execute
 
-    assert res.find { |t| t.url.end_with?('quick') }.get_sec < 1.0,
+    assert res.find { |t| t.url.end_with?('quick') }.read_sec < 1.0,
            'quick endpoint measured over 1 sec'
-    assert res.find { |t| t.url.end_with?('slow') }.get_sec >= 1.0,
+    assert res.find { |t| t.url.end_with?('slow') }.read_sec >= 1.0,
            'quick endpoint measured under 1 sec'
   end
 end
