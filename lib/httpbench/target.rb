@@ -7,6 +7,8 @@ class HTTPBench
     extend Forwardable
     def_delegators :uri, :host, :port, :path, :scheme
 
+    BM = ->(&blk) { Benchmark.measure { blk.call }.real }
+
     def self.benchmark(url, cfg)
       new(url, cfg: cfg).execute
     end
@@ -28,7 +30,7 @@ class HTTPBench
     private
 
     def connect(http = nil)
-      [bm { http = @net.start(host, port, http_opts) },
+      [BM.call { http = @net.start(host, port, http_opts) },
        http]
     end
 
@@ -39,18 +41,12 @@ class HTTPBench
     end
 
     def get(http, res = nil)
-      [bm { res = http.get(path) },
+      [BM.call { res = http.get(path) },
        res.code]
     end
 
     def uri
       @uri ||= URL.parse @url
-    end
-
-    def bm(&blk)
-      Benchmark.measure do
-        blk.call
-      end.real
     end
   end
 end
