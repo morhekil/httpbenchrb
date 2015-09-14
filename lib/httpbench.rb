@@ -1,4 +1,9 @@
-class HTTPBench < Array
+require 'forwardable'
+
+class HTTPBench
+  extend Forwardable
+  def_delegators :@targets, :map, :pop
+
   # default number of thread workers
   WORKERS = 4
   # default read/open timeout
@@ -34,7 +39,13 @@ class HTTPBench < Array
     end
   end
 
-  # execute all configured running, running them on a pool of threads
+  # set up httpbench, making a copy of caller's array of targets
+  # to not mess it up
+  def initialize(targets = [])
+    @targets = targets.dup
+  end
+
+  # execute all configured targets, running them on a pool of threads
   # capped at config.workers value
   def execute(target: Target, config: Config.new)
     [].tap { |res| config.run_pool { process target, res, config } }
